@@ -1,0 +1,85 @@
+spring:
+  application:
+    name: poc-rag
+
+  docker:
+    compose:
+      stop:
+        command: down
+
+  servlet:
+    multipart:
+      max-file-size: ${SERVLET_MAX_FILE_SIZE:10MB}
+      max-request-size: ${SERVLET_MAX_REQUEST_SIZE:10MB}
+
+  datasource:
+    url: ${DB_H2_URL_CONFIG}
+    hikari:
+      jdbc-url: ${DB_H2_HIRAKI_URL_CONFIG}
+    driver-class-name: org.h2.Driver
+    username: ${DB_H2_USERNAME}
+    password: ${DB_H2_PASSWORD}
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  ai:
+    vectorstore:
+      qdrant:
+        initialize-schema: true
+        host: ${QDRANT_HOST}
+        port: 6334
+        collection-name: ${COLLECTION_NAME}
+
+    chat:
+      client:
+        enabled: false
+      memory:
+        repository:
+          jdbc:
+            initialize-schema: always
+            schema: ${CLASSPATH_DB_SCHEMA}
+
+    ollama:
+      chat:
+        options:
+          model: ${OLLAMA_MODEL_VERSION}
+    model:
+      chat: ollama
+
+logging:
+  level:
+    org:
+      springframework:
+        ai:
+          chat:
+            client:
+              advisor: DEBUG
+        web: INFO
+
+    web:
+      servlet:
+        mvc:
+          method:
+            annotation:
+              RequestMappingHandlerMapping: DEBUG
+  pattern:
+    console: ${LOGGING_PATTERN_CONSOLE}
+
+rag:
+  data-loader:
+    similarity-threshold: ${DATA_LOADER_SIMILARITY_THRESHOLD:0.5}
+    top-k: ${DATA_LOADER_TOP_K:2}
+    max-chunk-size: ${DATA_LOADER_MAX_CHUNK_SIZE:100}
+  rh:
+    similarity-threshold: ${RH_SIMILARITY_THRESHOLD:0.6}
+    top-k: ${RH_TOP_K:4}
+    chunk-size: ${RH_CHUNK_SIZE:100}
+    max-chunk-size: ${RH_MAX_CHUNK_SIZE:100}
+  ai:
+    similarity-threshold: ${RH_SIMILARITY_THRESHOLD:0.6}
+    top-k: ${RH_TOP_K:5}
+    chunk-size: ${RH_CHUNK_SIZE:100}
+    max-chunk-size: ${RH_MAX_CHUNK_SIZE:100}
