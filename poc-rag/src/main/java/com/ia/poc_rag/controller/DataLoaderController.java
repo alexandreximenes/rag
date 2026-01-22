@@ -6,11 +6,11 @@ import reactor.core.publisher.Flux;
 
 @RestController
 @RequestMapping("api/v1")
-public class RagController {
+public class DataLoaderController {
 
     private final RandomDataLoaderService randomDataLoaderService;
 
-    public RagController(RandomDataLoaderService randomDataLoaderService) {
+    public DataLoaderController(RandomDataLoaderService randomDataLoaderService) {
         this.randomDataLoaderService = randomDataLoaderService;
     }
 
@@ -18,6 +18,6 @@ public class RagController {
     public Flux<String> chat(@RequestParam String message,
                              @RequestHeader(value = "username", defaultValue = "anonymous")
                              String username){
-        return randomDataLoaderService.randomDataLoader(message, username);
+        return randomDataLoaderService.chat(message, username);
     }
 }

@@ -1,6 +1,6 @@
 package com.ia.poc_rag.controller;
 
-import com.ia.poc_rag.service.SpringIAQuestionService;
+import com.ia.poc_rag.service.AIQuestionService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,15 +11,15 @@ import java.util.LinkedHashSet;
 
 @RestController
 @RequestMapping("api/v1")
-public class SpringAIQuestionController {
+public class AIQuestionController {
 
-    private final SpringIAQuestionService springAIQuestionService;
+    private final AIQuestionService springAIQuestionService;
 
-    public SpringAIQuestionController(SpringIAQuestionService springAIQuestionService) {
+    public AIQuestionController(AIQuestionService springAIQuestionService) {
         this.springAIQuestionService = springAIQuestionService;
     }
 
-    @GetMapping("/spring-ai/chat")
+    @GetMapping("/ai/chat")
     public Flux<String> chat(@RequestParam String message,
                              @RequestHeader(value = "username", defaultValue = "anonymous")
                              String username){
@@ -27,7 +27,7 @@ public class SpringAIQuestionController {
     }
 
     @PostMapping(
-            path = "/spring-ai/upload/files",
+            path = "/ai/upload/files",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
     public ResponseEntity<?> uploadPdf(@RequestParam("file") LinkedHashSet<MultipartFile> files) {

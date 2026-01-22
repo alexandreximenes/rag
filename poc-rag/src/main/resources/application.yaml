@@ -2,6 +2,10 @@ spring:
   application:
     name: poc-rag
 
+  threads:
+    virtual:
+      enabled: true
+
   docker:
     compose:
       stop:
@@ -9,8 +13,8 @@ spring:
 
   servlet:
     multipart:
-      max-file-size: ${SERVLET_MAX_FILE_SIZE:10MB}
-      max-request-size: ${SERVLET_MAX_REQUEST_SIZE:10MB}
+      max-file-size: ${SERVLET_MAX_FILE_SIZE:100MB}
+      max-request-size: ${SERVLET_MAX_REQUEST_SIZE:100MB}
 
   datasource:
     url: ${DB_H2_URL_CONFIG}
@@ -30,7 +34,7 @@ spring:
       qdrant:
         initialize-schema: true
         host: ${QDRANT_HOST}
-        port: 6334
+        port: ${QDRANT_PORT}
         collection-name: ${COLLECTION_NAME}
 
     chat:
@@ -68,18 +72,23 @@ logging:
   pattern:
     console: ${LOGGING_PATTERN_CONSOLE}
 
-rag:
+app:
+  chat-memory:
+    max-messages: ${CHAT_MEMORY_MAX_MESSAGES:10}
   data-loader:
     similarity-threshold: ${DATA_LOADER_SIMILARITY_THRESHOLD:0.5}
     top-k: ${DATA_LOADER_TOP_K:2}
     max-chunk-size: ${DATA_LOADER_MAX_CHUNK_SIZE:100}
+    loader-file-enabled: ${DATA_LOADER_FILE_ENABLED:true}
   rh:
     similarity-threshold: ${RH_SIMILARITY_THRESHOLD:0.6}
     top-k: ${RH_TOP_K:4}
-    chunk-size: ${RH_CHUNK_SIZE:100}
-    max-chunk-size: ${RH_MAX_CHUNK_SIZE:100}
+    chunk-size: ${RH_CHUNK_SIZE:200}
+    max-chunk-size: ${RH_MAX_CHUNK_SIZE:400}
+    loader-file-enabled: ${RH_LOADER_FILE_ENABLED:true}
   ai:
     similarity-threshold: ${RH_SIMILARITY_THRESHOLD:0.6}
     top-k: ${RH_TOP_K:5}
     chunk-size: ${RH_CHUNK_SIZE:100}
     max-chunk-size: ${RH_MAX_CHUNK_SIZE:100}
+    loader-file-enabled: ${AI_LOADER_FILE_ENABLED:true}

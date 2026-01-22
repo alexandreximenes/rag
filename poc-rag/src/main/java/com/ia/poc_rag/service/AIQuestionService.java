@@ -1,7 +1,6 @@
 package com.ia.poc_rag.service;
 
-import com.ia.poc_rag.config.AIProperties;
-import com.ia.poc_rag.config.RhProperties;
+import com.ia.poc_rag.config.properties.AIProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
@@ -14,32 +13,33 @@ import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.unit.DataSize;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.springframework.ai.chat.memory.ChatMemory.CONVERSATION_ID;
 
 @Service
-public class SpringIAQuestionService {
+public class AIQuestionService {
 
-    static Logger log = LoggerFactory.getLogger(SpringIAQuestionService.class);
+    static Logger log = LoggerFactory.getLogger(AIQuestionService.class);
 
     private final ChatClient chatClient;
     private final VectorStore vectorStore;
     private final Resource iaSystemPromptTemplate;
     private final AIProperties aiProperties;
     public static final String DOCUMENTS = "documents";
-    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
-    public SpringIAQuestionService(
+    @Value("${spring.servlet.multipart.max-file-size}")
+    private DataSize dataSize;
+
+    public AIQuestionService(
             @Qualifier("chatMemoryClient") ChatClient chatClient,
             VectorStore vectorStore,
             @Value("classpath:/promptTemplates/springIASystemPromptTemplate.st")
@@ -59,7 +59,7 @@ public class SpringIAQuestionService {
         if (document.isEmpty()) {
             return Flux.just("Não encontrei informações relevantes para responder com base no conhecimento disponível.");
         }
-        String similarContext = getSimilarContext(document);
+        String similarContext = buildSimilarContext(document);
         return getStreamContent(message, username, similarContext);
     }
 
@@ -80,10 +80,10 @@ public class SpringIAQuestionService {
         return SearchRequest.builder()
                 .query(message)
                 // Busca os 3 documentos mais similares (relevantes) ao prompt do usuário
-                .topK(aiProperties.ai().topK())
                 // Busca somente documentos que contenham pelo menos
+                .topK(aiProperties.topK())
                 // 50% de similaridade com o prompt do usuário
-                .similarityThreshold(aiProperties.ai().similarityThreshold())
+                .similarityThreshold(aiProperties.similarityThreshold())
                 .build();
     }
 
@@ -102,7 +102,7 @@ public class SpringIAQuestionService {
                 .content();
     }
 
-    private String getSimilarContext(Set<Document> documents) {
+    private String buildSimilarContext(Set<Document> documents) {
         return documents.stream()
                 .filter(Objects::nonNull)
                 .peek(document -> {
@@ -116,10 +116,9 @@ public class SpringIAQuestionService {
                 .collect(Collectors.joining("\n---\n"));
     }
 
-    private String sanitize(String text) {
-        return text.length() > 1500
-                ? text.substring(0, 1500)
-                : text;
+    private String sanitize(String texts) {
+        return texts.trim()
+                .replaceAll("\\s+", " ");
     }
 
     public void uploadFile(LinkedHashSet<MultipartFile> files) {
@@ -131,15 +130,14 @@ public class SpringIAQuestionService {
             List<Document> documents = documentReader.get();
             enrichMetadata(documents, file);
             List<Document> chunks = split(documents);
-
             vectorStore.add(chunks);
         });
     }
 
     private List<Document> split(List<Document> documents) {
         TextSplitter splitter = TokenTextSplitter.builder()
-                .withChunkSize(aiProperties.ai().chunkSize())
-                .withMaxNumChunks(aiProperties.ai().maxChunkSize())
+                .withChunkSize(aiProperties.chunkSize())
+                .withMaxNumChunks(aiProperties.maxChunkSize())
                 .build();
 
         return splitter.split(documents);
@@ -160,7 +158,7 @@ public class SpringIAQuestionService {
                 throw new IllegalArgumentException("Arquivo não informado ou vazio");
             }
 
-            if (file.getSize() > MAX_FILE_SIZE) {
+            if (file.getSize() > dataSize.toBytes()) {
                 throw new IllegalArgumentException("Arquivo excede o tamanho máximo permitido");
             }
 

@@ -1,6 +1,6 @@
 package com.ia.poc_rag.service;
 
-import com.ia.poc_rag.config.DataLoaderProperties;
+import com.ia.poc_rag.config.properties.DataLoaderProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
@@ -27,7 +27,7 @@ public class RandomDataLoaderService {
     private final ChatClient chatClient;
     private final VectorStore vectorStore;
     private final Resource systemPromptRandomDataTemplate;
-    private final DataLoaderProperties dataLoaderProperties;
+    private final DataLoaderProperties properties;
     public static final String DOCUMENTS = "documents";
 
     public RandomDataLoaderService(
@@ -35,15 +35,15 @@ public class RandomDataLoaderService {
             VectorStore vectorStore,
             @Value("classpath:/promptTemplates/systemPromptRandomDataTemplate.st")
             Resource systemPromptRandomDataTemplate,
-            DataLoaderProperties dataLoaderProperties) {
+            DataLoaderProperties properties) {
 
         this.chatClient = chatClient;
         this.vectorStore = vectorStore;
         this.systemPromptRandomDataTemplate = systemPromptRandomDataTemplate;
-        this.dataLoaderProperties = dataLoaderProperties;
+        this.properties = properties;
     }
 
-    public Flux<String> randomDataLoader(String message, String username) {
+    public Flux<String> chat(String message, String username) {
         SearchRequest searchRequest = getSearchRequest(message);
         List<Document> documents = vectorStore.similaritySearch(searchRequest);
         if (documents.isEmpty()) {
@@ -57,11 +57,8 @@ public class RandomDataLoaderService {
     private SearchRequest getSearchRequest(String message) {
         return SearchRequest.builder()
                 .query(message)
-                // Busca os 3 documentos mais similares (relevantes) ao prompt do usuário
-                .topK(dataLoaderProperties.dataLoader().topK())
-                // Busca somente documentos que contenham pelo menos
-                // 50% de similaridade com o prompt do usuário
-                .similarityThreshold(dataLoaderProperties.dataLoader().similarityThreshold())
+                .topK(properties.topK())
+                .similarityThreshold(properties.similarityThreshold())
                 .build();
     }
 

@@ -1,8 +1,8 @@
 package com.ia.poc_rag;
 
-import com.ia.poc_rag.config.AIProperties;
-import com.ia.poc_rag.config.DataLoaderProperties;
-import com.ia.poc_rag.config.RhProperties;
+import com.ia.poc_rag.config.properties.AIProperties;
+import com.ia.poc_rag.config.properties.DataLoaderProperties;
+import com.ia.poc_rag.config.properties.RhProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

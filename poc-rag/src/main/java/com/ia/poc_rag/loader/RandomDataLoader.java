@@ -1,17 +1,21 @@
 package com.ia.poc_rag.loader;
 
 import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.document.Document;
+import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
-@ConditionalOnMissingBean(RHDataLoader.class)
+@ConditionalOnProperty(prefix = "app.data-loader", name = "loader-file-enabled", havingValue = "true", matchIfMissing = false)
 public class RandomDataLoader {
 
+    private static final Logger log = LoggerFactory.getLogger(RandomDataLoader.class);
     private final VectorStore vectorStore;
 
     public RandomDataLoader(VectorStore vectorStore) {
@@ -20,6 +24,7 @@ public class RandomDataLoader {
 
     @PostConstruct
     public void loadSentencesIntoVectorStore() {
+        log.info("Carregando Random Data Loader no Vector Store...");
         List<String> sentences = List.of(
                 "Java é usado para construir aplicações corporativas escaláveis.",
                 "Python é comumente usado para tarefas de aprendizado de máquina e automação.",
@@ -77,7 +82,20 @@ public class RandomDataLoader {
                 "A análise SWOT identifica forças, fraquezas, oportunidades e ameaças."
         );
 
-        List<Document> documents = sentences.stream().map(Document::new).toList();
-        vectorStore.add(documents);
-    };
+        if(vectorStore.similaritySearch(getSimilaritySearch(sentences)).isEmpty()) {
+            log.info("Carregando {} Data Loader no Vector Store.", sentences.size());
+            List<Document> documents = sentences.stream()
+                    .map(document -> document.replaceAll("\\s+", " ").trim())
+                    .map(Document::new).toList();
+            vectorStore.add(documents);
+        } else {
+            log.info("Nenhum carregamento necessário. Random Data Loader já existe no Vector Store.");
+        }
+    }
+
+    private SearchRequest getSimilaritySearch(List<String> sentences) {
+        return SearchRequest.builder().similarityThreshold(0.7).topK(3).query(sentences.getFirst()).build();
+    }
+
+    ;
 }

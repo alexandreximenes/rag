@@ -18,6 +18,6 @@ public class RhController {
     public Flux<String> chat(@RequestParam String message,
                              @RequestHeader(value = "username", defaultValue = "anonymous")
                              String username){
-        return rhService.rhChat(message, username);
+        return rhService.chat(message, username);
     }
 }
