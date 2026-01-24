@@ -39,7 +39,7 @@ spring:
 
     chat:
       client:
-        enabled: false
+        enabled: true
       memory:
         repository:
           jdbc:
@@ -47,11 +47,18 @@ spring:
             schema: ${CLASSPATH_DB_SCHEMA}
 
     ollama:
+      embedding:
+        options:
+          model: ${OLLAMA_EMBEDDING_MODEL:bert-base-nlp-portuguese}
       chat:
         options:
           model: ${OLLAMA_MODEL_VERSION}
-    model:
-      chat: ollama
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,loggers,prometheus
 
 logging:
   level:
@@ -92,3 +99,6 @@ app:
     chunk-size: ${RH_CHUNK_SIZE:100}
     max-chunk-size: ${RH_MAX_CHUNK_SIZE:100}
     loader-file-enabled: ${AI_LOADER_FILE_ENABLED:true}
+  tavily:
+    api-key: ${TAVILY_API_KEY}
+    base-url: ${TAVILY_BASE_URL}

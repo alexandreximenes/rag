@@ -9,4 +9,6 @@ Releases
 - v0.2.0 \- Persistência H2 para memória de chat; scripts de schema adicionados.
 - v0.3.0 \- Adicionados controllers `RagController`, `RhController`, `SpringAIQuestionController`.
 - v0.4.0 \- Configuração de `AIProperties` refatorada; templates de prompt reorganizados.
-- v1.0.0 \- Release candidate: ajustes de estabilidade e documentação.
+- 24/01/2025 
+  - Adicionando Pre-Retrieve com WebSearch utiliznado Tavily
+  - Adicionando Post-Retrieve com LLM utilizando Mascara nos dados sensiveis

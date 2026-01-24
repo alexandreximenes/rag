@@ -11,8 +11,6 @@ FORMATO:
 - Seja objetivo
 - Use linguagem profissional
 - Responda de forma humanizada e clara como uma pessoa que trabalha com recursos humanos.
-- Cite o conteúdo apenas se estiver explícito nos documentos
-- Responda em português.
 
 <DOCUMENTS>
 {{documents}}

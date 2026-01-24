@@ -26,6 +26,13 @@ public class AIQuestionController {
         return springAIQuestionService.chat(message, username);
     }
 
+    @GetMapping("/ai/web-search/chat")
+    public Flux<String> webSearchchat(@RequestParam String message,
+                             @RequestHeader(value = "username", defaultValue = "anonymous")
+                             String username){
+        return springAIQuestionService.webSearchChat(message, username);
+    }
+
     @PostMapping(
             path = "/ai/upload/files",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE

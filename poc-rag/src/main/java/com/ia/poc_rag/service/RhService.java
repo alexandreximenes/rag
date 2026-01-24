@@ -12,7 +12,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -59,9 +58,9 @@ public class RhService {
 
         return this.chatClient
                 .prompt()
-                .system(promptSystemSpec ->
-                        promptSystemSpec.text(rhSystemPromptTemplate, StandardCharsets.UTF_8)
-                                .param(DOCUMENTS, similarityText))
+                .system(promptSystemSpec -> promptSystemSpec
+                        .text(rhSystemPromptTemplate)
+                        .param(DOCUMENTS, similarityText))
                 .advisors(advisorSpec ->
                         advisorSpec.param(CONVERSATION_ID, username))
                 .user(message)

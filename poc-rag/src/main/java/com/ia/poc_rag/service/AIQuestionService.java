@@ -31,6 +31,7 @@ public class AIQuestionService {
     static Logger log = LoggerFactory.getLogger(AIQuestionService.class);
 
     private final ChatClient chatClient;
+    private final ChatClient webSearchChatClient;
     private final VectorStore vectorStore;
     private final Resource iaSystemPromptTemplate;
     private final AIProperties aiProperties;
@@ -41,12 +42,14 @@ public class AIQuestionService {
 
     public AIQuestionService(
             @Qualifier("chatMemoryClient") ChatClient chatClient,
+            @Qualifier("webSearchRAGChatClient") ChatClient webSearchChatClient,
             VectorStore vectorStore,
             @Value("classpath:/promptTemplates/springIASystemPromptTemplate.st")
             Resource iaSystemPromptTemplate,
             AIProperties aiProperties) {
 
         this.chatClient = chatClient;
+        this.webSearchChatClient = webSearchChatClient;
         this.vectorStore = vectorStore;
         this.iaSystemPromptTemplate = iaSystemPromptTemplate;
         this.aiProperties = aiProperties;
@@ -166,5 +169,14 @@ public class AIQuestionService {
                 throw new IllegalArgumentException("Apenas arquivos PDF são permitidos");
             }
         });
+    }
+
+    public Flux<String> webSearchChat(String message, String username) {
+        return webSearchChatClient.prompt()
+                .advisors(advisorSpec ->
+                        advisorSpec.param(CONVERSATION_ID, username))
+                .user(message)
+                .stream()
+                .content();
     }
 }
